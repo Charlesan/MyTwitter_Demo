@@ -1,0 +1,109 @@
+#content {
+	font-family: "Helvetica";
+	margin-left: auto;
+	margin-right: auto;
+	width: 990px;
+}
+
+#welcome {
+	margin-bottom: 30px;
+}
+
+/* Column
+----------------------------------------------*/
+.column {
+	float: left;
+	margin-left: 18px;
+	display: block;
+}
+
+.left {
+	margin-left: 0px;
+	clear: left;
+	width: 234px;
+}
+
+.right {
+	width: 738px;
+}
+
+/* Left Column
+----------------------------------------------*/
+.avatar img{
+	height: 200px;
+	width: 200px;
+}
+
+dl {
+	font-family: "Helvetica";
+}
+
+dl dt {
+	font-weight: bold;
+}
+
+dl dd {
+	margin-left: 50px;
+}
+
+/* Right Column: Twitter
+----------------------------------------------*/
+.twitter {
+	border: 2px gray solid;
+	background: #CC9933;
+	padding: 5px;
+	margin-top: 20px;
+	text-align: justify;
+	overflow: hidden;
+}
+
+.twitter span {
+	display: block;
+}
+
+.username {
+	font-size: 25px;
+	font-weight: bold;
+	font-style: italic;
+}
+
+.twitterContent {
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.twitterDate {
+	font-size: 12px;
+}
+
+.twitterComment {
+	display: none;
+}
+
+.commentInput {
+	margin-top: 20px;
+}
+
+.commentInput input {
+	width: 500px;
+	margin-right: 30px;
+}
+
+.commentUser {
+	font-style: italic;
+	font-weight: bold;
+}
+.commentDate {
+	font-size: 12px;
+	text-align: right;
+}
+
+.float_div
+{
+	position:absolute;
+    display:none;
+    background:#ffffff;
+    color:#000000;
+    border:1px solid red;
+    padding: 5px;
+}

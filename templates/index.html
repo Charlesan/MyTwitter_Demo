@@ -1,0 +1,193 @@
+<!DOCTYPE HTML>
+
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>{{ user["name"] }}'s Mainpage</title>
+	<link rel="stylesheet" type="text/css" href="{{ static_url("css/style.css") }}" title="style" />
+	<script type="text/javascript" src="{{ static_url("js/jquery-1.10.2.min.js") }}"></script>
+	<script type="text/javascript">
+		$( document ).ready(function() {
+			//Fetch Users' Comments based on the Twitter Clicked
+			$( "div.twitter a" ).click(function(event) {
+				var ancestor = $(this).parents( "div.twitter" );
+				ancestor.find(".twitterComment").show();
+				var username = ancestor.find(".username").text();
+				var twitterDate = ancestor.find(".twitterDate").text();
+				// console.log(username);
+				$.ajax({
+					url: "/comment",
+					type: "GET",
+					dataType: "json",
+					data: {"username": username,
+						   "twitterDate": twitterDate},
+				    success: function( json ) {
+				    	// console.log(json.length);
+				    	for (var i = 0; i < json.length; i++) {
+				    		// console.log(json[i].comment_content);
+				    		var $newElement = $("<div class=\"userComment\">"
+				    			+ "<span class=\"commentUser\">" + json[i].comment_by + "</span>"
+				    			+ "<span class=\"commentContent\">" + json[i].comment_content + "</span>"
+				    			+ "<span class=\"commentDate\">" + json[i].comment_date + "</span>"
+				    			+ "</div>");
+				    		$newElement.insertAfter(ancestor.find(".commentInput"));
+				    	}
+				    },
+				    error: function( xhr, status ) {
+				    	alert( "Sorry, there was a problem!" );
+				    }
+				});		
+			});
+
+            //Submit Comment
+            $(".commentInput button").click(function(event) {
+            	var ancestor = $(this).parents( "div.twitter" );
+            	var twitterOwnerUsername = ancestor.find(".username").text();
+				var twitterDate = ancestor.find(".twitterDate").text();
+				var commentContent = ancestor.find("input").val();
+				$.ajax({
+					url: "/comment",
+					type: "POST",
+					dataType: "json",
+					data: {"twitterOwnerUsername": twitterOwnerUsername,
+						   "twitterDate": twitterDate,
+						   "commentContent": commentContent},
+				    success: function( json ) {
+				    	// console.log(json);
+				    	var $newElement = $("<div class=\"userComment\">"
+				    		+ "<span class=\"commentUser\">" + json.comment_by + "</span>"
+				    		+ "<span class=\"commentContent\">" + json.comment_content + "</span>"
+				    		+ "<span class=\"commentDate\">" + json.comment_date + "</span>"
+				    		+ "</div>");
+				    	$newElement.insertAfter(ancestor.find(".commentInput"));
+				    },
+				    error: function( xhr, status ) {
+				    	alert( "Sorry, there was a problem!" );
+				    }
+				});
+				ancestor.find("input").val("");	
+            });
+		});
+		</script>
+	<script type="text/javascript">
+	//Implementation of Floating Window ！！这个功能目前只能work在Chrome，Firefox不work，原因是window.event
+    //flag控制每次鼠标进入，只请求一次
+    var flag = false;
+    //悬浮框内容
+    var floatBlock = $("<div><strong>Friends:</strong><span id='friendsNum'></span><br/><strong>Twitters:</strong><span id='twittersNum'></span></div>");
+
+    //鼠标在头像上移动时调用，传入头像所在div的id
+    //username作为参数，用于发送请求
+    var displayInfo = function()
+    {
+        // var _e = eve; 
+        var _e = window.event;
+        var pos = mouselocation(_e);
+
+        //display=none
+        floatBlock.addClass("float_div");
+        $(".avatar img").after(floatBlock);
+        
+        //reset its position according to the mouse 
+        floatBlock.css("top", pos.y);
+        floatBlock.css("left", pos.x);
+        
+        //send a request the first time mouse into
+        if( flag == false )
+        {
+            flag = true;
+            //Send Request
+            $.ajax({
+            	url: "/getInfo",
+				type: "Get",
+				dataType: "json",
+				success: function( json ) {
+					// console.log(json)
+					floatBlock.css("display", "inline");
+					$("#friendsNum").html(json.friendsNum);  
+					$("#twittersNum").html(json.twittersNum);
+				},
+				error: function( xhr, status ) {
+					alert( "Sorry, there was a problem!" );
+				}
+			});            
+        }
+    }
+
+    //鼠标移出时调用
+    var hideInfo = function()
+    {
+        flag = false;
+        //reset its visible
+        floatBlock.css("display", "none");
+    }
+
+    //get the position of mouse
+    var mouselocation = function(ev)
+    {
+        if(ev.pageX || ev.pageY)
+        {
+            return{
+                x:ev.pageX,
+                y:ev.pageY
+            };
+        }
+
+        return{
+            x:ev.clientX + document.body.scrollLeft - document.body.clientLeft,
+            y:ev.clientY + document.body.scrollTop - document.body.clientTo
+        };
+    }
+		</script>
+</head>
+
+<body>
+	<div id="content">
+		<div id="welcome">
+			<h1>Hello, {{ user["name"] }}!</h1>
+			<a href="/logout">Logout</a>
+		</div>
+		<div>
+			<div class="column left">
+				<div class="avatar">
+					<img src="{{ user["image"] }}" onmousemove="displayInfo()" onmouseout="hideInfo()" /></div>
+				<dl>
+					<dt>NAME</dt>
+					<dd>{{ user["name"] }}</dd>
+					<dt>E-MAIL</dt>
+					<dd>{{ user["email"] }}</dd>
+					<dt>AGE</dt>
+					<dd>{{ user["age"] }}</dd>
+				</dl>
+			</div>
+			<div class="column right">
+				<div id="input">
+					<span>
+						<textarea id= "inputTwitterContent" rows="10" cols="80"></textarea>
+					</span>
+					<p style="text-align: right;">
+						<input id="submit_button" type="submit" value="Submit"></p>
+				</div>
+				{% for oneTwitter in reversed(allTwitters) %}
+				<div class="twitter">
+					<span class="username">{{ oneTwitter["username"] }}</span>
+					<span class="twitterContent">{{ oneTwitter["content"] }}</span>
+					<span class="twitterDate">{{ oneTwitter["time"] }}</span>
+					<span style="text-align: right;">
+						<a href="javascript:void(0);">Comment</a>
+					</span>
+					<div class="twitterComment">
+						<span class="commentInput">
+							<input type="text">
+							<button>comment</button>
+						</span>
+					</div>
+				</div>
+				{% end %}
+			</div>
+		</div>
+	</div>
+
+</body>
+
+</html>
